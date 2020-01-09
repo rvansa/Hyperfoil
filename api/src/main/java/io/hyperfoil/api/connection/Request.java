@@ -126,4 +126,13 @@ public abstract class Request implements Callable<Void>, GenericFutureListener<F
       sendTimestampNanos = System.nanoTime();
    }
 
+   public void enter() {
+      session.currentSequence(sequence);
+      session.currentRequest(this);
+   }
+
+   public void exit() {
+      session.currentSequence(null);
+      session.currentRequest(null);
+   }
 }

@@ -136,7 +136,13 @@ class Http2Connection extends Http2EventAdapter implements HttpConnection {
          }
          --numStreams;
          request.statistics().addCacheHit(request.startTimestampMillis());
-         request.handlers().handleEnd(request, false);
+         request.enter();
+         try {
+            request.handlers().handleEnd(request, false);
+         } finally {
+            request.exit();
+            request.session.proceed();
+         }
          tryReleaseToPool();
          return;
       }
@@ -190,8 +196,13 @@ class Http2Connection extends Http2EventAdapter implements HttpConnection {
       for (IntObjectMap.PrimitiveEntry<HttpRequest> entry : streams.entries()) {
          HttpRequest request = entry.value();
          if (!request.isCompleted()) {
-            request.handlers().handleThrowable(request, cause);
-            request.session.proceed();
+            request.enter();
+            try {
+               request.handlers().handleThrowable(request, cause);
+            } finally {
+               request.exit();
+               request.session.proceed();
+            }
          }
       }
    }
@@ -217,9 +228,18 @@ class Http2Connection extends Http2EventAdapter implements HttpConnection {
                code = Integer.parseInt(headers.status().toString());
             } catch (NumberFormatException ignore) {
             }
-            handlers.handleStatus(request, code, "");
-            for (Map.Entry<CharSequence, CharSequence> header : headers) {
-               handlers.handleHeader(request, header.getKey(), header.getValue());
+            request.enter();
+            try {
+               handlers.handleStatus(request, code, "");
+               for (Map.Entry<CharSequence, CharSequence> header : headers) {
+                  handlers.handleHeader(request, header.getKey(), header.getValue());
+               }
+            } catch (Throwable t) {
+               log.error("Response processing failed on {}", t, this);
+               handlers.handleThrowable(request, t);
+            } finally {
+               request.exit();
+               request.session.proceed();
             }
          }
          if (endStream) {
@@ -233,7 +253,16 @@ class Http2Connection extends Http2EventAdapter implements HttpConnection {
          HttpRequest request = streams.get(streamId);
          if (request != null && !request.isCompleted()) {
             HttpResponseHandlers handlers = request.handlers();
-            handlers.handleBodyPart(request, data, data.readerIndex(), data.readableBytes(), endOfStream);
+            request.enter();
+            try {
+               handlers.handleBodyPart(request, data, data.readerIndex(), data.readableBytes(), endOfStream);
+            } catch (Throwable t) {
+               log.error("Response processing failed on {}", t, this);
+               handlers.handleThrowable(request, t);
+            } finally {
+               request.exit();
+               request.session.proceed();
+            }
          }
          if (endOfStream) {
             endStream(streamId);
@@ -248,8 +277,14 @@ class Http2Connection extends Http2EventAdapter implements HttpConnection {
             numStreams--;
             HttpResponseHandlers handlers = request.handlers();
             if (!request.isCompleted()) {
-               // TODO: maybe add a specific handler because we don't need to terminate other streams
-               handlers.handleThrowable(request, new IOException("HTTP2 stream was reset"));
+               request.enter();
+               try {
+                  // TODO: maybe add a specific handler because we don't need to terminate other streams
+                  handlers.handleThrowable(request, new IOException("HTTP2 stream was reset"));
+               } finally {
+                  request.exit();
+                  request.session.proceed();
+               }
             }
             tryReleaseToPool();
          }
@@ -260,8 +295,19 @@ class Http2Connection extends Http2EventAdapter implements HttpConnection {
          if (request != null) {
             numStreams--;
             if (!request.isCompleted()) {
-               request.handlers().handleEnd(request, true);
-               log.trace("Completed response on {}", this);
+               request.enter();
+               try {
+                  request.handlers().handleEnd(request, true);
+                  if (trace) {
+                     log.trace("Completed response on {}", this);
+                  }
+               } catch (Throwable t) {
+                  log.error("Response processing failed on {}", t, this);
+                  request.handlers().handleThrowable(request, t);
+               } finally {
+                  request.exit();
+                  request.session.proceed();
+               }
             }
             tryReleaseToPool();
          }
