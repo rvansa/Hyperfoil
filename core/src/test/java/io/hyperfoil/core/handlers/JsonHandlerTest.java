@@ -36,7 +36,7 @@ public class JsonHandlerTest {
             .expect(-1, 3, true)
             .expect(-1, 3, true)
             .expect(-1, 3, true);
-      JsonHandler handler = new JsonHandler(".[].id", expect);
+      JsonHandler handler = new JsonHandler(".[].id", false, null, expect);
       Session session = SessionFactory.forTesting();
 
       ByteBuf data = Unpooled.wrappedBuffer(JSON);
@@ -52,7 +52,7 @@ public class JsonHandlerTest {
    @Test
    public void testSplit() {
       ExpectProcessor expect = new ExpectProcessor();
-      JsonHandler handler = new JsonHandler(".[].id", expect);
+      JsonHandler handler = new JsonHandler(".[].id", false, null, expect);
       Session session = SessionFactory.forTesting();
       HttpRequest request = new HttpRequest(session);
       handler.reserve(session);
@@ -83,7 +83,7 @@ public class JsonHandlerTest {
    public void testSelectObject() {
       ExpectProcessor expect = new ExpectProcessor()
             .expect(9, 14, true);
-      JsonHandler handler = new JsonHandler(".foo", expect);
+      JsonHandler handler = new JsonHandler(".foo", false, null, expect);
       Session session = SessionFactory.forTesting();
 
       ByteBuf data = Unpooled.wrappedBuffer("{ \"foo\": { \"bar\" : 42 }}".getBytes(StandardCharsets.UTF_8));
@@ -109,7 +109,7 @@ public class JsonHandlerTest {
             assertThat(str).isEqualTo(expectedStrings.remove(0));
          }
       };
-      JsonHandler handler = new JsonHandler(".[].foo", new JsonParser.UnquotingProcessor(new DefragProcessor(expect)));
+      JsonHandler handler = new JsonHandler(".[].foo", false, null, new JsonUnquotingTransformer(new DefragProcessor(expect)));
       Session session = SessionFactory.forTesting();
       handler.reserve(session);
 

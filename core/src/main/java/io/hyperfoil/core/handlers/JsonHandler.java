@@ -8,14 +8,15 @@ import org.kohsuke.MetaInfServices;
 import io.hyperfoil.api.config.Name;
 import io.hyperfoil.api.processor.Processor;
 import io.hyperfoil.api.processor.RequestProcessorBuilder;
+import io.hyperfoil.api.processor.Transformer;
 import io.hyperfoil.core.builders.ServiceLoadedBuilderProvider;
 import io.netty.buffer.ByteBuf;
 import io.hyperfoil.api.session.Session;
 
 public class JsonHandler extends JsonParser implements Processor, Session.ResourceKey<JsonHandler.Context> {
 
-   public JsonHandler(String query, Processor processor) {
-      super(query.trim(), processor);
+   public JsonHandler(String query, boolean delete, Transformer replace, Processor processor) {
+      super(query.trim(), delete, replace, processor);
 
    }
 
@@ -80,14 +81,22 @@ public class JsonHandler extends JsonParser implements Processor, Session.Resour
       @Override
       public JsonHandler build(boolean fragmented) {
          Processor processor = this.processor.build(fragmented);
+         Transformer replace = this.replace == null ? null : this.replace.build(fragmented);
          if (unquote) {
-            processor = new UnquotingProcessor(processor);
+            processor = new JsonUnquotingTransformer(processor);
+            if (replace != null) {
+               replace = new JsonUnquotingTransformer(replace);
+            }
          }
-         return new JsonHandler(query, processor);
+         return new JsonHandler(query, delete, replace, processor);
       }
 
       /**
-       * Pass the selected parts to another processor.
+       * If neither `delete` or `replace` was set this processor will be called with the selected parts.
+       * In the other case the processor will be called with chunks of full (modified) JSON.
+       * <p>
+       * Note that the `processor.before()` and `processor.after()` methods are called only once for each request,
+       * not for the individual filtered items.
        *
        * @return Builder.
        */
