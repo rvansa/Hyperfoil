@@ -40,7 +40,9 @@ import org.yaml.snakeyaml.events.StreamStartEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.ServiceLoader;
 
 public class BenchmarkParser extends AbstractMappingParser<BenchmarkBuilder> {
@@ -107,7 +109,21 @@ public class BenchmarkParser extends AbstractMappingParser<BenchmarkBuilder> {
    }
 
    public Benchmark buildBenchmark(InputStream inputStream, BenchmarkData data) throws ParserException, IOException {
-      return buildBenchmark(Util.toString(inputStream), data);
+      return buildBenchmark(inputStream, data, null);
+   }
+
+   public Benchmark buildBenchmark(InputStream inputStream, BenchmarkData data, Properties properties)
+         throws ParserException, IOException {
+      String yaml = Util.toString(inputStream);
+      if (properties != null) {
+         Enumeration<String> enums = (Enumeration<String>) properties.propertyNames();
+         while (enums.hasMoreElements()) {
+            String key = enums.nextElement();
+            Object value = properties.get(key);
+            yaml = yaml.replaceAll(key, value.toString());
+         }
+      }
+      return buildBenchmark(yaml, data);
    }
 
    private static class DebugIterator<T> implements Iterator<T> {

@@ -1,0 +1,12 @@
+name: hotrod-example
+hotrod:
+  uri: hotrod://localhost:11222
+  cacheName: my-cache
+usersPerSec: 1
+duration: 5s
+scenario:
+  - example:
+      - randomInt: cacheKey <- 1 .. 999
+      - randomUUID: cacheValue
+      - hotrodRequest:
+          put: my-cache

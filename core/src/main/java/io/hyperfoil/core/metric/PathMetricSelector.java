@@ -1,4 +1,4 @@
-package io.hyperfoil.core.steps;
+package io.hyperfoil.core.metric;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 
 import io.hyperfoil.api.config.ListBuilder;
 import io.hyperfoil.api.config.Visitor;
-import io.hyperfoil.function.SerializableBiFunction;
 import io.hyperfoil.function.SerializableFunction;
 
 /**
@@ -19,8 +18,16 @@ import io.hyperfoil.function.SerializableFunction;
  * <li><code>-&gt; name</code> (metric applied if none of the previous expressions match).
  * </ul>
  */
-public class PathMetricSelector implements ListBuilder, SerializableBiFunction<String, String, String> {
+public class PathMetricSelector extends ProvidedMetricSelector implements ListBuilder {
    public List<SerializableFunction<String, String>> tests = new ArrayList<>();
+
+   public PathMetricSelector() {
+      super();
+   }
+
+   public PathMetricSelector(String name) {
+      super(name);
+   }
 
    @Override
    public void nextItem(String item) {
