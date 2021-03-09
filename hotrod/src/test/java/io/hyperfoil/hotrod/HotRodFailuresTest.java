@@ -1,12 +1,15 @@
 package io.hyperfoil.hotrod;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Map;
 
+import org.infinispan.Cache;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.manager.EmbeddedCacheManager;
+import org.infinispan.notifications.Listener;
+import org.infinispan.notifications.cachelistener.annotation.CacheEntryCreated;
+import org.infinispan.notifications.cachelistener.event.CacheEntryEvent;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -15,19 +18,31 @@ import io.hyperfoil.api.statistics.StatisticsSnapshot;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
 @RunWith(VertxUnitRunner.class)
-public class HotRodTest extends BaseHotRodTest {
+public class HotRodFailuresTest extends BaseHotRodTest {
 
    @Test
-   public void testHotRod() {
+   public void testHotRodFailures() {
       Benchmark benchmark = loadScenario("scenarios/HotRodTest.hf.yaml");
       Map<String, StatisticsSnapshot> stats = runScenario(benchmark);
       assertTrue(stats.get("example").requestCount > 0);
-      assertEquals(0, stats.get("example").resetCount);
+      assertTrue(stats.get("example").resetCount > 0);
    }
 
    @Override
    protected void createCache(EmbeddedCacheManager em) {
       ConfigurationBuilder cacheBuilder = new ConfigurationBuilder();
-      em.createCache("my-cache", cacheBuilder.build());
+      Cache cache = em.createCache("my-cache", cacheBuilder.build());
+      cache.getAdvancedCache().withStorageMediaType().addListener(new ErrorListener());
+   }
+
+   @Listener
+   public static class ErrorListener {
+      public ErrorListener() {
+      }
+
+      @CacheEntryCreated
+      public void entryCreated(CacheEntryEvent<String, String> event) {
+         throw new IllegalStateException("Failed intentionally");
+      }
    }
 }
