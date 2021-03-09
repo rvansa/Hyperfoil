@@ -1,17 +1,15 @@
 package io.hyperfoil.hotrod.config;
 
-import java.util.List;
-
 import io.hyperfoil.api.config.PluginConfig;
 
 public class HotRodPluginConfig implements PluginConfig {
-   private final List<HotRod> hotRodList;
+   private final HotRod hotRod;
 
-   public HotRodPluginConfig(List<HotRod> hotRodList) {
-      this.hotRodList = hotRodList;
+   public HotRodPluginConfig(HotRod hotRod) {
+      this.hotRod = hotRod;
    }
 
-   public List<HotRod> hotRod() {
-      return hotRodList;
+   public HotRod getHotRod() {
+      return hotRod;
    }
 }

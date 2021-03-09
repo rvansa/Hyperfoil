@@ -27,25 +27,29 @@ import io.vertx.ext.unit.TestContext;
 
 public abstract class BaseHotRodTest extends BaseScenarioTest {
 
-   protected HotRodServer hotrodServers;
+   protected HotRodServer[] hotrodServers;
+   private int numberServers = 1;
 
    @Before
    public void before(TestContext ctx) {
       super.before(ctx);
       TestResourceTracker.setThreadTestName("hyperfoil-HotRodTest");
+      hotrodServers = new HotRodServer[numberServers];
+      for (int i = 0; i < numberServers; i++) {
 
-      GlobalConfigurationBuilder globalBuilder = new GlobalConfigurationBuilder();
-      globalBuilder.globalState().persistentLocation(Files.temporaryFolder().getPath());
-      globalBuilder.globalState().enabled(true);
-      globalBuilder.security().authorization().disable();
+         GlobalConfigurationBuilder globalBuilder = new GlobalConfigurationBuilder();
+         globalBuilder.globalState().persistentLocation(Files.temporaryFolder().getPath());
+         globalBuilder.globalState().enabled(true);
+         globalBuilder.security().authorization().disable();
 
-      HotRodServerConfigurationBuilder serverBuilder = new HotRodServerConfigurationBuilder();
-      serverBuilder.adminOperationsHandler(new EmbeddedServerAdminOperationHandler());
+         HotRodServerConfigurationBuilder serverBuilder = new HotRodServerConfigurationBuilder();
+         serverBuilder.adminOperationsHandler(new EmbeddedServerAdminOperationHandler());
 
-      EmbeddedCacheManager em = new DefaultCacheManager(globalBuilder.build());
-      createCache(em);
-      hotrodServers = HotRodClientTestingUtil.startHotRodServer(em, serverBuilder);
-      hotrodServers.addKeyValueFilterConverterFactory("abc", new InvalidKeyValueFilterConverterFactory());
+         EmbeddedCacheManager em = new DefaultCacheManager(globalBuilder.build());
+         createCache(em);
+
+         hotrodServers[i] = HotRodClientTestingUtil.startHotRodServer(em, serverBuilder);
+      }
    }
 
    protected abstract void createCache(EmbeddedCacheManager em);
@@ -54,22 +58,17 @@ public abstract class BaseHotRodTest extends BaseScenarioTest {
    public void after(TestContext ctx) {
       super.after(ctx);
       if (hotrodServers != null) {
-         hotrodServers.stop();
+         for (HotRodServer hotRodServer : hotrodServers) {
+            hotRodServer.stop();
+         }
       }
    }
 
    @Override
    protected Benchmark loadBenchmark(InputStream config) throws IOException, ParserException {
-      String configString = Util.toString(config).replaceAll("hotrod://localhost:11222", "hotrod://localhost:" + hotrodServers.getPort());
+      String configString = Util.toString(config)
+            .replaceAll("hotrod://localhost:11222", "hotrod://localhost:" + hotrodServers[0].getPort());
       Benchmark benchmark = BenchmarkParser.instance().buildBenchmark(configString, TestUtil.benchmarkData());
       return benchmark;
-   }
-
-   public static class InvalidKeyValueFilterConverterFactory implements KeyValueFilterConverterFactory {
-
-      @Override
-      public KeyValueFilterConverter getFilterConverter() {
-         throw new IllegalStateException("intentionally failures");
-      }
    }
 }

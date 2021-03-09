@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import io.hyperfoil.api.config.Benchmark;
+import io.hyperfoil.api.config.BenchmarkDefinitionException;
 import io.hyperfoil.api.config.Scenario;
 import io.hyperfoil.api.session.Session;
 import io.hyperfoil.core.api.PluginRunData;
@@ -29,19 +30,26 @@ public class HotRodRunData implements PluginRunData {
 
       List<String> allCaches = new ArrayList<>();
       Map<String, List<String>> cacheNamesByUri = new HashMap<>();
-      for (HotRod hotRod : this.plugin.hotRod()) {
-         List<String> cacheNames = cacheNamesByUri.get(hotRod.getUri());
+      if (this.plugin.getHotRod().getUris().size() > 1) {
+         // EventLoop is shared between RCM, Hyperfoil should support groups
+         // uri: hotrod://site-a:11222 -> should run only on site-a
+         // uri: hotrod://site-b:11222 -> should run only on site-b
+         throw new BenchmarkDefinitionException("Hyperfoil HotRod plugin support only one EventLoop.");
+      }
+      for (HotRod.HotRodUri hotRodUri : this.plugin.getHotRod().getUris()) {
+         List<String> cacheNames = cacheNamesByUri.get(hotRodUri.getUri());
          if (cacheNames == null) {
             cacheNames = new ArrayList<>();
          }
-         cacheNames.add(hotRod.getCacheName());
-         cacheNamesByUri.put(hotRod.getUri(), cacheNames);
-
-         // validation
-         if (allCaches.contains(hotRod.getCacheName())) {
-            throw new IllegalStateException(String.format("Duplicated cache: %s", hotRod.getCacheName()));
+         for (String cacheName : hotRodUri.getCaches()) {
+            // validation
+            if (allCaches.contains(cacheName)) {
+               throw new BenchmarkDefinitionException(String.format("Duplicated cache: %s", cacheName));
+            }
+            cacheNames.add(cacheName);
+            allCaches.add(cacheName);
          }
-         allCaches.add(hotRod.getCacheName());
+         cacheNamesByUri.put(hotRodUri.getUri(), cacheNames);
       }
 
       this.pool = new HotRodRemoteCachePool[executors.length];

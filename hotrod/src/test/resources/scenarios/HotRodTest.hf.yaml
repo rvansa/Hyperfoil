@@ -1,7 +1,8 @@
 name: hotrod-example
 hotrod:
-  uri: hotrod://localhost:11222
-  cacheName: my-cache
+  - uri: hotrod://localhost:11222
+    caches:
+    - my-cache
 usersPerSec: 1
 duration: 5s
 scenario:
