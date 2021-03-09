@@ -37,8 +37,4 @@ public class HotRodBuilder implements Rewritable<HotRodBuilder> {
       HotRod hotRod = new HotRod(this.uri, this.cacheName);
       return hotRod;
    }
-
-   public String getCacheName() {
-      return cacheName;
-   }
 }
