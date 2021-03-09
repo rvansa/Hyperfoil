@@ -1,11 +1,17 @@
 package io.hyperfoil.http;
 
-import java.util.Properties;
+import java.io.IOException;
+import java.io.InputStream;
 
 import org.junit.Before;
 import org.junit.runner.RunWith;
 
+import io.hyperfoil.api.config.Benchmark;
+import io.hyperfoil.core.parser.BenchmarkParser;
+import io.hyperfoil.core.parser.ParserException;
 import io.hyperfoil.core.session.BaseScenarioTest;
+import io.hyperfoil.core.test.TestUtil;
+import io.hyperfoil.core.util.Util;
 import io.hyperfoil.http.config.HttpBuilder;
 import io.hyperfoil.http.config.HttpPluginBuilder;
 import io.hyperfoil.http.config.Protocol;
@@ -61,9 +67,9 @@ public abstract class HttpScenarioTest extends BaseScenarioTest {
    protected abstract void initRouter();
 
    @Override
-   protected Properties getScenarioReplacements() {
-      Properties properties = new Properties();
-      properties.put("http://localhost:8080", "http://localhost:" + server.actualPort());
-      return properties;
+   protected Benchmark loadBenchmark(InputStream config) throws IOException, ParserException {
+      String configString = Util.toString(config).replaceAll("http://localhost:8080", "http://localhost:" + server.actualPort());
+      Benchmark benchmark = BenchmarkParser.instance().buildBenchmark(configString, TestUtil.benchmarkData());
+      return benchmark;
    }
 }

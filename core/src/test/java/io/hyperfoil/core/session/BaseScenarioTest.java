@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Before;
@@ -58,8 +57,7 @@ public abstract class BaseScenarioTest {
    protected Benchmark loadScenario(String name) {
       try {
          InputStream config = getClass().getClassLoader().getResourceAsStream(name);
-         Properties properties = getScenarioReplacements();
-         Benchmark benchmark = loadBenchmark(config, properties);
+         Benchmark benchmark = loadBenchmark(config);
          // Serialization here is solely for the purpose of asserting serializability for all the components
          byte[] bytes = Util.serialize(benchmark);
          assertThat(bytes).isNotNull();
@@ -69,12 +67,8 @@ public abstract class BaseScenarioTest {
       }
    }
 
-   protected Properties getScenarioReplacements() {
-      return null;
-   }
-
-   private Benchmark loadBenchmark(InputStream config, Properties properties) throws IOException, ParserException {
-      return BenchmarkParser.instance().buildBenchmark(config, TestUtil.benchmarkData(), properties);
+   protected Benchmark loadBenchmark(InputStream config) throws IOException, ParserException {
+      return BenchmarkParser.instance().buildBenchmark(config, TestUtil.benchmarkData());
    }
 
    @After

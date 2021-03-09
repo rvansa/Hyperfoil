@@ -3,6 +3,8 @@ package io.hyperfoil.hotrod;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
 
@@ -22,7 +24,11 @@ import org.junit.runner.RunWith;
 
 import io.hyperfoil.api.config.Benchmark;
 import io.hyperfoil.api.statistics.StatisticsSnapshot;
+import io.hyperfoil.core.parser.BenchmarkParser;
+import io.hyperfoil.core.parser.ParserException;
 import io.hyperfoil.core.session.BaseScenarioTest;
+import io.hyperfoil.core.test.TestUtil;
+import io.hyperfoil.core.util.Util;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
@@ -69,9 +75,9 @@ public class HotRodTest extends BaseScenarioTest {
    }
 
    @Override
-   protected Properties getScenarioReplacements() {
-      Properties properties = new Properties();
-      properties.put("hotrod://localhost:11222", "hotrod://localhost:" + hotrodServers.getPort());
-      return properties;
+   protected Benchmark loadBenchmark(InputStream config) throws IOException, ParserException {
+      String configString = Util.toString(config).replaceAll("hotrod://localhost:11222", "hotrod://localhost:" + hotrodServers.getPort());
+      Benchmark benchmark = BenchmarkParser.instance().buildBenchmark(configString, TestUtil.benchmarkData());
+      return benchmark;
    }
 }
