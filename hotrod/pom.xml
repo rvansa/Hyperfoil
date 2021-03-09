@@ -12,6 +12,10 @@
     <artifactId>hyperfoil-hotrod</artifactId>
     <name>Hyperfoil Hot Rod Client</name>
 
+    <properties>
+        <version.infinispan>12.0.1.Final</version.infinispan>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>io.hyperfoil</groupId>

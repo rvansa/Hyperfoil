@@ -95,7 +95,6 @@
         <version.slf4j>1.7.12</version.slf4j>
         <version.snakeyaml>1.22</version.snakeyaml>
         <version.vertx>3.9.3</version.vertx>
-        <version.infinispan>12.0.1.Final</version.infinispan>
 
         <version.sonatype.nexus>1.6.8</version.sonatype.nexus>
         <version.maven.source>3.0.1</version.maven.source>
