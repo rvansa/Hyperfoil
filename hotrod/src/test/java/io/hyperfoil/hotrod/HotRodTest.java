@@ -65,7 +65,7 @@ public class HotRodTest extends BaseScenarioTest {
       Benchmark benchmark = loadScenario("scenarios/HotRodTest.hf.yaml");
       Map<String, StatisticsSnapshot> stats = runScenario(benchmark);
       assertTrue(stats.get("example").requestCount > 0);
-      assertEquals(0, stats.get("example").requestCount);
+      assertEquals(0, stats.get("example").resetCount);
    }
 
    @Override

@@ -3,13 +3,12 @@ package io.hyperfoil.hotrod.steps;
 import io.hyperfoil.api.config.Step;
 import io.hyperfoil.api.session.Session;
 import io.hyperfoil.hotrod.resource.HotRodResource;
-import io.hyperfoil.hotrod.resource.HotRodResourceKey;
 
 public class HotRodResponseStep implements Step {
 
-   final HotRodResourceKey futureWrapperKey;
+   final HotRodResource.Key futureWrapperKey;
 
-   protected HotRodResponseStep(HotRodResourceKey futureWrapperKey) {
+   protected HotRodResponseStep(HotRodResource.Key futureWrapperKey) {
       this.futureWrapperKey = futureWrapperKey;
    }
 

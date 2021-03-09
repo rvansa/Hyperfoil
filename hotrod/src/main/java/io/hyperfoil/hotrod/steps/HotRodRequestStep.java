@@ -19,18 +19,17 @@ import io.hyperfoil.function.SerializableFunction;
 import io.hyperfoil.hotrod.api.HotRodOperation;
 import io.hyperfoil.hotrod.api.HotRodRemoteCachePool;
 import io.hyperfoil.hotrod.resource.HotRodResource;
-import io.hyperfoil.hotrod.resource.HotRodResourceKey;
 
 public class HotRodRequestStep extends StatisticsStep implements ResourceUtilizer, SLA.Provider {
 
-   final HotRodResourceKey futureWrapperKey;
+   final HotRodResource.Key futureWrapperKey;
    final SerializableFunction<Session, HotRodOperation> operation;
    final SerializableFunction<Session, String> cacheName;
    final Access cacheKeyAccess;
    final Access cacheValueAccess;
    final ProvidedMetricSelector metricSelector;
 
-   protected HotRodRequestStep(int id, HotRodResourceKey futureWrapperKey,
+   protected HotRodRequestStep(int id, HotRodResource.Key futureWrapperKey,
                                SerializableFunction<Session, HotRodOperation> operation,
                                SerializableFunction<Session, String> cacheName,
                                ProvidedMetricSelector metricSelector,

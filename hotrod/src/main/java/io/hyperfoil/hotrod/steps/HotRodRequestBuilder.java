@@ -15,7 +15,7 @@ import io.hyperfoil.core.metric.ProvidedMetricSelector;
 import io.hyperfoil.core.session.SessionFactory;
 import io.hyperfoil.core.steps.StatisticsStep;
 import io.hyperfoil.hotrod.api.HotRodOperation;
-import io.hyperfoil.hotrod.resource.HotRodResourceKey;
+import io.hyperfoil.hotrod.resource.HotRodResource;
 
 /**
  * Issues a HotRod request and registers handlers for the response.
@@ -39,7 +39,7 @@ public class HotRodRequestBuilder extends BaseStepBuilder<HotRodRequestBuilder> 
    @Override
    public List<Step> build() {
       int stepId = StatisticsStep.nextId();
-      HotRodResourceKey key = new HotRodResourceKey();
+      HotRodResource.Key key = new HotRodResource.Key();
       HotRodRequestStep step = new HotRodRequestStep(stepId, key, operation.build(), cacheName.build(), metricSelector,
             SessionFactory.access("cacheKey"), SessionFactory.access("cacheValue"));
       HotRodResponseStep secondHotRodStep = new HotRodResponseStep(key);

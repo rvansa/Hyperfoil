@@ -32,4 +32,8 @@ public class HotRodResource implements Session.Resource {
       // TODO LATER send time is the difference between startTimestamp in NS and before the request goes to the wire
       return 0;
    }
+
+   public static class Key implements Session.ResourceKey<HotRodResource> {
+
+   }
 }
