@@ -36,6 +36,7 @@ import io.hyperfoil.core.generators.StringGeneratorBuilder;
 import io.hyperfoil.core.generators.StringGeneratorImplBuilder;
 import io.hyperfoil.core.handlers.GzipInflatorProcessor;
 import io.hyperfoil.core.handlers.StoreProcessor;
+import io.hyperfoil.core.metric.MetricSelector;
 import io.hyperfoil.core.metric.ProvidedMetricSelector;
 import io.hyperfoil.core.session.SessionFactory;
 import io.hyperfoil.core.steps.DelaySessionStartStep;
@@ -78,7 +79,7 @@ public class HttpRequestStepBuilder extends BaseStepBuilder<HttpRequestStepBuild
    private BodyGeneratorBuilder body;
    private final List<Supplier<SerializableBiConsumer<Session, HttpRequestWriter>>> headerAppenders = new ArrayList<>();
    private boolean injectHostHeader = true;
-   private ProvidedMetricSelector metricSelector;
+   private MetricSelector metricSelector;
    private long timeout = Long.MIN_VALUE;
    private final HttpResponseHandlersImpl.Builder handler = new HttpResponseHandlersImpl.Builder(this);
    private boolean sync = true;
@@ -423,7 +424,7 @@ public class HttpRequestStepBuilder extends BaseStepBuilder<HttpRequestStepBuild
       return metric(new ProvidedMetricSelector(name));
    }
 
-   public HttpRequestStepBuilder metric(ProvidedMetricSelector selector) {
+   public HttpRequestStepBuilder metric(MetricSelector selector) {
       this.metricSelector = selector;
       return this;
    }

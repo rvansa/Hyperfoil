@@ -10,6 +10,7 @@ import io.hyperfoil.api.config.Name;
 import io.hyperfoil.api.config.Step;
 import io.hyperfoil.api.config.StepBuilder;
 import io.hyperfoil.core.builders.BaseStepBuilder;
+import io.hyperfoil.core.metric.MetricSelector;
 import io.hyperfoil.core.metric.PathMetricSelector;
 import io.hyperfoil.core.metric.ProvidedMetricSelector;
 import io.hyperfoil.core.session.SessionFactory;
@@ -26,7 +27,7 @@ public class HotRodRequestBuilder extends BaseStepBuilder<HotRodRequestBuilder> 
 
    private HotRodOperationBuilder operation;
    private HotRodCacheNameBuilder cacheName;
-   private ProvidedMetricSelector metricSelector;
+   private MetricSelector metricSelector;
 
    @Override
    public void prepareBuild() {

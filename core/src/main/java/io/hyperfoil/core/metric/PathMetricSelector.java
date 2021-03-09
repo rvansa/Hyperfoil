@@ -18,16 +18,8 @@ import io.hyperfoil.function.SerializableFunction;
  * <li><code>-&gt; name</code> (metric applied if none of the previous expressions match).
  * </ul>
  */
-public class PathMetricSelector extends ProvidedMetricSelector implements ListBuilder {
+public class PathMetricSelector implements ListBuilder, MetricSelector {
    public List<SerializableFunction<String, String>> tests = new ArrayList<>();
-
-   public PathMetricSelector() {
-      super();
-   }
-
-   public PathMetricSelector(String name) {
-      super(name);
-   }
 
    @Override
    public void nextItem(String item) {

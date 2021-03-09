@@ -11,6 +11,7 @@ import io.hyperfoil.api.session.ResourceUtilizer;
 import io.hyperfoil.api.session.Session;
 import io.hyperfoil.api.statistics.Statistics;
 import io.hyperfoil.core.builders.SLA;
+import io.hyperfoil.core.metric.MetricSelector;
 import io.hyperfoil.core.metric.ProvidedMetricSelector;
 import io.hyperfoil.core.session.IntVar;
 import io.hyperfoil.core.session.ObjectVar;
@@ -27,12 +28,12 @@ public class HotRodRequestStep extends StatisticsStep implements ResourceUtilize
    final SerializableFunction<Session, String> cacheName;
    final Access cacheKeyAccess;
    final Access cacheValueAccess;
-   final ProvidedMetricSelector metricSelector;
+   final MetricSelector metricSelector;
 
    protected HotRodRequestStep(int id, HotRodResource.Key futureWrapperKey,
                                SerializableFunction<Session, HotRodOperation> operation,
                                SerializableFunction<Session, String> cacheName,
-                               ProvidedMetricSelector metricSelector,
+                               MetricSelector metricSelector,
                                Access cacheKeyAccess,
                                Access cacheValueAccess) {
       super(id);

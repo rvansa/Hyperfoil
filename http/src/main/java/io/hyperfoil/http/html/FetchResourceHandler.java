@@ -17,8 +17,8 @@ import io.hyperfoil.core.builders.ServiceLoadedBuilderProvider;
 import io.hyperfoil.core.data.LimitedPoolResource;
 import io.hyperfoil.core.data.Queue;
 import io.hyperfoil.core.metric.AuthorityAndPathMetric;
+import io.hyperfoil.core.metric.MetricSelector;
 import io.hyperfoil.core.metric.PathMetricSelector;
-import io.hyperfoil.core.metric.ProvidedMetricSelector;
 import io.hyperfoil.core.session.ObjectVar;
 import io.hyperfoil.core.session.SessionFactory;
 import io.hyperfoil.core.util.Unique;
@@ -81,7 +81,7 @@ public class FetchResourceHandler implements Serializable, ResourceUtilizer {
     * Automates download of embedded resources.
     */
    public static class Builder implements BuilderBase<Builder> {
-      private ProvidedMetricSelector metricSelector;
+      private MetricSelector metricSelector;
       private int maxResources;
       private int concurrency = 8;
       private Action.Builder onCompletion;
@@ -127,7 +127,7 @@ public class FetchResourceHandler implements Serializable, ResourceUtilizer {
          return metricSelector;
       }
 
-      public Builder metric(ProvidedMetricSelector metricSelector) {
+      public Builder metric(MetricSelector metricSelector) {
          if (this.metricSelector != null) {
             throw new BenchmarkDefinitionException("Metric already set!");
          }
