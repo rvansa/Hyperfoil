@@ -37,10 +37,7 @@ public class HotRodRunData implements PluginRunData {
          throw new BenchmarkDefinitionException("Hyperfoil HotRod plugin support only one EventLoop.");
       }
       for (HotRod.HotRodUri hotRodUri : this.plugin.getHotRod().getUris()) {
-         List<String> cacheNames = cacheNamesByUri.get(hotRodUri.getUri());
-         if (cacheNames == null) {
-            cacheNames = new ArrayList<>();
-         }
+         List<String> cacheNames = cacheNamesByUri.computeIfAbsent(hotRodUri.getUri(), k -> new ArrayList<>());
          for (String cacheName : hotRodUri.getCaches()) {
             // validation
             if (allCaches.contains(cacheName)) {
