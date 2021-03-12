@@ -1,17 +1,15 @@
 package io.hyperfoil.hotrod.config;
 
-import java.util.List;
-
 import io.hyperfoil.api.config.BenchmarkBuilder;
 import io.hyperfoil.api.config.BenchmarkDefinitionException;
 import io.hyperfoil.api.config.PluginBuilder;
 import io.hyperfoil.api.config.PluginConfig;
 
-public class HotRodClusterPluginBuilder extends PluginBuilder<HotRodErgonomics> {
+public class HotRodPluginBuilder extends PluginBuilder<HotRodErgonomics> {
 
    private HotRodClusterBuilder defaultHotRod;
 
-   public HotRodClusterPluginBuilder(BenchmarkBuilder parent) {
+   public HotRodPluginBuilder(BenchmarkBuilder parent) {
       super(parent);
    }
 
@@ -30,11 +28,6 @@ public class HotRodClusterPluginBuilder extends PluginBuilder<HotRodErgonomics> 
    @Override
    public PluginConfig build() {
       return new HotRodPluginConfig(defaultHotRod.build());
-   }
-
-   public HotRodClusterBuilder hotRod(List<HotRodCluster> hotRods) {
-      HotRodClusterBuilder builder = new HotRodClusterBuilder().hotRods(hotRods);
-      return builder;
    }
 
    public HotRodClusterBuilder hotRod() {

@@ -20,11 +20,6 @@ public class HotRodClusterBuilder implements Rewritable<HotRodClusterBuilder> {
 
    }
 
-   public HotRodClusterBuilder hotRods(List<HotRodCluster> hotRods) {
-      this.hotRods.addAll(hotRods);
-      return this;
-   }
-
    public HotRodClusterBuilder hotRod(HotRodCluster hotRod) {
       this.hotRods.add(hotRod);
       return this;

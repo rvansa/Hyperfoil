@@ -16,7 +16,7 @@ import io.hyperfoil.core.parser.Parser;
 import io.hyperfoil.core.parser.ParserException;
 import io.hyperfoil.hotrod.config.HotRodCluster;
 import io.hyperfoil.hotrod.config.HotRodClusterBuilder;
-import io.hyperfoil.hotrod.config.HotRodClusterPluginBuilder;
+import io.hyperfoil.hotrod.config.HotRodPluginBuilder;
 
 public class HotRodParser extends AbstractParser<BenchmarkBuilder, HotRodClusterBuilder> {
    public HotRodParser() {
@@ -25,7 +25,7 @@ public class HotRodParser extends AbstractParser<BenchmarkBuilder, HotRodCluster
 
    @Override
    public void parse(Context ctx, BenchmarkBuilder target) throws ParserException {
-      HotRodClusterPluginBuilder plugin = target.addPlugin(HotRodClusterPluginBuilder::new);
+      HotRodPluginBuilder plugin = target.addPlugin(HotRodPluginBuilder::new);
       if (ctx.peek() instanceof SequenceStartEvent) {
          ctx.parseList(plugin, (ctx1, builder) -> {
             HotRodClusterBuilder hotRod = builder.hotRod();
