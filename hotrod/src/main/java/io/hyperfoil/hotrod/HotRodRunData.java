@@ -2,9 +2,7 @@ package io.hyperfoil.hotrod;
 
 import java.time.Clock;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 import io.hyperfoil.api.config.Benchmark;
@@ -14,7 +12,6 @@ import io.hyperfoil.api.session.Session;
 import io.hyperfoil.core.api.PluginRunData;
 import io.hyperfoil.core.impl.ConnectionStatsConsumer;
 import io.hyperfoil.hotrod.api.HotRodRemoteCachePool;
-import io.hyperfoil.hotrod.config.HotRod;
 import io.hyperfoil.hotrod.config.HotRodPluginConfig;
 import io.hyperfoil.hotrod.connection.HotRodRemoteCachePoolImpl;
 import io.netty.channel.EventLoop;
@@ -28,30 +25,26 @@ public class HotRodRunData implements PluginRunData {
    public HotRodRunData(Benchmark benchmark, EventLoop[] executors, int agentId) {
       this.plugin = benchmark.plugin(HotRodPluginConfig.class);
 
-      List<String> allCaches = new ArrayList<>();
-      Map<String, List<String>> cacheNamesByUri = new HashMap<>();
-      if (this.plugin.getHotRod().getUris().size() > 1) {
-         // EventLoop is shared between RCM, Hyperfoil should support groups
+      if (this.plugin.getClusters().size() > 1) {
          // uri: hotrod://site-a:11222 -> should run only on site-a
          // uri: hotrod://site-b:11222 -> should run only on site-b
-         throw new BenchmarkDefinitionException("Hyperfoil HotRod plugin support only one EventLoop.");
+         throw new BenchmarkDefinitionException("Hyperfoil HotRod plugin support only one uri.");
       }
-      for (HotRod.HotRodUri hotRodUri : this.plugin.getHotRod().getUris()) {
-         List<String> cacheNames = cacheNamesByUri.computeIfAbsent(hotRodUri.getUri(), k -> new ArrayList<>());
-         for (String cacheName : hotRodUri.getCaches()) {
+
+      List<String> allCaches = new ArrayList<>();
+      this.plugin.getClusters().values().forEach(hotRodCluster -> {
+         for (String cacheName : hotRodCluster.getCaches()) {
             // validation
             if (allCaches.contains(cacheName)) {
                throw new BenchmarkDefinitionException(String.format("Duplicated cache: %s", cacheName));
             }
-            cacheNames.add(cacheName);
             allCaches.add(cacheName);
          }
-         cacheNamesByUri.put(hotRodUri.getUri(), cacheNames);
-      }
+      });
 
       this.pool = new HotRodRemoteCachePool[executors.length];
       for (int i = 0; i < executors.length; i++) {
-         this.pool[i] = new HotRodRemoteCachePoolImpl(cacheNamesByUri, executors[i]);
+         this.pool[i] = new HotRodRemoteCachePoolImpl(this.plugin.getClusters(), executors[i]);
       }
    }
 

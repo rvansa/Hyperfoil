@@ -14,21 +14,21 @@ import io.hyperfoil.core.parser.AbstractParser;
 import io.hyperfoil.core.parser.Context;
 import io.hyperfoil.core.parser.Parser;
 import io.hyperfoil.core.parser.ParserException;
-import io.hyperfoil.hotrod.config.HotRod;
-import io.hyperfoil.hotrod.config.HotRodBuilder;
-import io.hyperfoil.hotrod.config.HotRodPluginBuilder;
+import io.hyperfoil.hotrod.config.HotRodCluster;
+import io.hyperfoil.hotrod.config.HotRodClusterBuilder;
+import io.hyperfoil.hotrod.config.HotRodClusterPluginBuilder;
 
-public class HotRodParser extends AbstractParser<BenchmarkBuilder, HotRodBuilder> {
+public class HotRodParser extends AbstractParser<BenchmarkBuilder, HotRodClusterBuilder> {
    public HotRodParser() {
-      register("uri", new HotRodUriParser<>(HotRodBuilder::uri));
+      register("uri", new HotRodClusterParser<>(HotRodClusterBuilder::hotRod));
    }
 
    @Override
    public void parse(Context ctx, BenchmarkBuilder target) throws ParserException {
-      HotRodPluginBuilder plugin = target.addPlugin(HotRodPluginBuilder::new);
+      HotRodClusterPluginBuilder plugin = target.addPlugin(HotRodClusterPluginBuilder::new);
       if (ctx.peek() instanceof SequenceStartEvent) {
          ctx.parseList(plugin, (ctx1, builder) -> {
-            HotRodBuilder hotRod = builder.hotRod();
+            HotRodClusterBuilder hotRod = builder.hotRod();
             callSubBuilders(ctx1, hotRod);
          });
       } else {
@@ -36,10 +36,10 @@ public class HotRodParser extends AbstractParser<BenchmarkBuilder, HotRodBuilder
       }
    }
 
-   public static class HotRodUriParser<T> implements Parser<T> {
-      private final BiConsumer<T, HotRod.HotRodUri> consumer;
+   public static class HotRodClusterParser<T> implements Parser<T> {
+      private final BiConsumer<T, HotRodCluster> consumer;
 
-      public HotRodUriParser(BiConsumer<T, HotRod.HotRodUri> consumer) {
+      public HotRodClusterParser(BiConsumer<T, HotRodCluster> consumer) {
          this.consumer = consumer;
       }
 
@@ -60,8 +60,8 @@ public class HotRodParser extends AbstractParser<BenchmarkBuilder, HotRodBuilder
                throw ctx.unexpectedEvent(next);
             }
          }
-         HotRod.HotRodUri uri = new HotRod.HotRodUri(eventUri.getValue(), caches);
-         consumer.accept(target, uri);
+         HotRodCluster hotRod = new HotRodCluster(eventUri.getValue(), caches);
+         consumer.accept(target, hotRod);
       }
    }
 }

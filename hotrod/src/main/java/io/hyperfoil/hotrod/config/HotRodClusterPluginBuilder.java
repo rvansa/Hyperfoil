@@ -7,11 +7,11 @@ import io.hyperfoil.api.config.BenchmarkDefinitionException;
 import io.hyperfoil.api.config.PluginBuilder;
 import io.hyperfoil.api.config.PluginConfig;
 
-public class HotRodPluginBuilder extends PluginBuilder<HotRodErgonomics> {
+public class HotRodClusterPluginBuilder extends PluginBuilder<HotRodErgonomics> {
 
-   private HotRodBuilder defaultHotRod;
+   private HotRodClusterBuilder defaultHotRod;
 
-   public HotRodPluginBuilder(BenchmarkBuilder parent) {
+   public HotRodClusterPluginBuilder(BenchmarkBuilder parent) {
       super(parent);
    }
 
@@ -32,14 +32,14 @@ public class HotRodPluginBuilder extends PluginBuilder<HotRodErgonomics> {
       return new HotRodPluginConfig(defaultHotRod.build());
    }
 
-   public HotRodBuilder hotRod(List<HotRod.HotRodUri> uri) {
-      HotRodBuilder builder = new HotRodBuilder().uris(uri);
+   public HotRodClusterBuilder hotRod(List<HotRodCluster> hotRods) {
+      HotRodClusterBuilder builder = new HotRodClusterBuilder().hotRods(hotRods);
       return builder;
    }
 
-   public HotRodBuilder hotRod() {
+   public HotRodClusterBuilder hotRod() {
       if (defaultHotRod == null) {
-         defaultHotRod = new HotRodBuilder();
+         defaultHotRod = new HotRodClusterBuilder();
       }
       return defaultHotRod;
    }
