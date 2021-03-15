@@ -9,9 +9,9 @@ public class HotRodCluster implements Serializable {
 
    // https://infinispan.org/blog/2020/05/26/hotrod-uri
    private final String uri;
-   private final List<String> caches;
+   private final String[] caches;
 
-   public HotRodCluster(String uri, List<String> caches) {
+   public HotRodCluster(String uri, String[] caches) {
       // used to validate the uri
       HotRodURI.create(uri);
 
@@ -19,11 +19,11 @@ public class HotRodCluster implements Serializable {
       this.caches = caches;
    }
 
-   public String getUri() {
+   public String uri() {
       return this.uri;
    }
 
-   public List<String> getCaches() {
+   public String[] caches() {
       return this.caches;
    }
 }

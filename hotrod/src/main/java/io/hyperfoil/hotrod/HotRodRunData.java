@@ -12,6 +12,7 @@ import io.hyperfoil.api.session.Session;
 import io.hyperfoil.core.api.PluginRunData;
 import io.hyperfoil.core.impl.ConnectionStatsConsumer;
 import io.hyperfoil.hotrod.api.HotRodRemoteCachePool;
+import io.hyperfoil.hotrod.config.HotRodCluster;
 import io.hyperfoil.hotrod.config.HotRodPluginConfig;
 import io.hyperfoil.hotrod.connection.HotRodRemoteCachePoolImpl;
 import io.netty.channel.EventLoop;
@@ -25,26 +26,20 @@ public class HotRodRunData implements PluginRunData {
    public HotRodRunData(Benchmark benchmark, EventLoop[] executors, int agentId) {
       this.plugin = benchmark.plugin(HotRodPluginConfig.class);
 
-      if (this.plugin.getClusters().size() > 1) {
-         // uri: hotrod://site-a:11222 -> should run only on site-a
-         // uri: hotrod://site-b:11222 -> should run only on site-b
-         throw new BenchmarkDefinitionException("Hyperfoil HotRod plugin support only one uri.");
-      }
-
       List<String> allCaches = new ArrayList<>();
-      this.plugin.getClusters().values().forEach(hotRodCluster -> {
-         for (String cacheName : hotRodCluster.getCaches()) {
-            // validation
+      for (HotRodCluster cluster : this.plugin.clusters()) {
+         for (String cacheName : cluster.caches()) {
+            // TODO: remove this limitation
             if (allCaches.contains(cacheName)) {
                throw new BenchmarkDefinitionException(String.format("Duplicated cache: %s", cacheName));
             }
             allCaches.add(cacheName);
          }
-      });
+      }
 
       this.pool = new HotRodRemoteCachePool[executors.length];
       for (int i = 0; i < executors.length; i++) {
-         this.pool[i] = new HotRodRemoteCachePoolImpl(this.plugin.getClusters(), executors[i]);
+         this.pool[i] = new HotRodRemoteCachePoolImpl(this.plugin.clusters(), executors[i]);
       }
    }
 

@@ -1,13 +1,16 @@
 package io.hyperfoil.hotrod.config;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
 import io.hyperfoil.api.config.BenchmarkBuilder;
 import io.hyperfoil.api.config.BenchmarkDefinitionException;
 import io.hyperfoil.api.config.PluginBuilder;
 import io.hyperfoil.api.config.PluginConfig;
 
 public class HotRodPluginBuilder extends PluginBuilder<HotRodErgonomics> {
-
-   private HotRodClusterBuilder defaultHotRod;
+   private final List<HotRodClusterBuilder> clusters = new ArrayList<>();
 
    public HotRodPluginBuilder(BenchmarkBuilder parent) {
       super(parent);
@@ -20,20 +23,22 @@ public class HotRodPluginBuilder extends PluginBuilder<HotRodErgonomics> {
 
    @Override
    public void prepareBuild() {
-      if (defaultHotRod == null) {
-         throw new BenchmarkDefinitionException("No HotRod target set!");
-      }
    }
 
    @Override
    public PluginConfig build() {
-      return new HotRodPluginConfig(defaultHotRod.build());
+      HotRodCluster[] clusters = this.clusters.stream().map(HotRodClusterBuilder::build).toArray(HotRodCluster[]::new);
+      if (clusters.length == 0) {
+         throw new BenchmarkDefinitionException("No clusters set!");
+      } else if (Stream.of(clusters).map(HotRodCluster::uri).distinct().count() != clusters.length) {
+         throw new BenchmarkDefinitionException("Cluster definition with duplicate uris!");
+      }
+      return new HotRodPluginConfig(clusters);
    }
 
-   public HotRodClusterBuilder hotRod() {
-      if (defaultHotRod == null) {
-         defaultHotRod = new HotRodClusterBuilder();
-      }
-      return defaultHotRod;
+   public HotRodClusterBuilder addCluster() {
+      HotRodClusterBuilder builder = new HotRodClusterBuilder();
+      clusters.add(builder);
+      return builder;
    }
 }

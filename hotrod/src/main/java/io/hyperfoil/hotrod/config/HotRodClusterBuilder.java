@@ -8,26 +8,26 @@ import java.util.Map;
 import io.hyperfoil.api.config.Rewritable;
 
 public class HotRodClusterBuilder implements Rewritable<HotRodClusterBuilder> {
-
-   private List<HotRodCluster> hotRods;
-
-   HotRodClusterBuilder() {
-      this.hotRods = new ArrayList<>();
-   }
+   private String uri;
+   private List<String> caches = new ArrayList<>();
 
    @Override
    public void readFrom(HotRodClusterBuilder other) {
-
+      this.uri = other.uri;
+      this.caches = new ArrayList<>(other.caches);
    }
 
-   public HotRodClusterBuilder hotRod(HotRodCluster hotRod) {
-      this.hotRods.add(hotRod);
+   public HotRodClusterBuilder uri(String uri) {
+      this.uri = uri;
       return this;
    }
 
-   public Map<String, HotRodCluster> build() {
-      Map<String, HotRodCluster> clusters = new HashMap<>();
-      this.hotRods.forEach(hotRod -> clusters.put(hotRod.getUri(), hotRod));
-      return clusters;
+   public HotRodClusterBuilder addCache(String cache) {
+      this.caches.add(cache);
+      return this;
+   }
+
+   public HotRodCluster build() {
+      return new HotRodCluster(uri, caches.toArray(String[]::new));
    }
 }

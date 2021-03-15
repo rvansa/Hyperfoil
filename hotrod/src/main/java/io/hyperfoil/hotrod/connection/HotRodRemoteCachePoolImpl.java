@@ -18,32 +18,31 @@ import io.netty.channel.EventLoopGroup;
 
 public class HotRodRemoteCachePoolImpl implements HotRodRemoteCachePool {
 
-   private final Map<String, HotRodCluster> clusters;
+   private final HotRodCluster[] clusters;
    private final EventLoop eventLoop;
 
-   private Map<String, RemoteCacheManager> remoteCacheManagers;
-   private Map<String, RemoteCache> remoteCaches;
+   private final Map<String, RemoteCacheManager> remoteCacheManagers = new HashMap<>();
+   private final Map<String, RemoteCache<?, ?>> remoteCaches = new HashMap<>();
 
-   public HotRodRemoteCachePoolImpl(Map<String, HotRodCluster> clusters, EventLoop eventLoop) {
+   public HotRodRemoteCachePoolImpl(HotRodCluster[] clusters, EventLoop eventLoop) {
       this.clusters = clusters;
       this.eventLoop = eventLoop;
-
-      this.remoteCacheManagers = new HashMap<>();
-      this.remoteCaches = new HashMap<>();
    }
 
    @Override
    public void start() {
-      for (String uri : clusters.keySet()) {
+      for (HotRodCluster cluster : clusters) {
          Properties properties = new Properties();
          properties.setProperty("infinispan.client.hotrod.default_executor_factory.pool_size", "1");
-         ConfigurationBuilder cb = new ConfigurationBuilder().uri(uri);
+         ConfigurationBuilder cb = new ConfigurationBuilder().uri(cluster.uri());
          cb.withProperties(properties);
          cb.asyncExecutorFactory().factory(p -> eventLoop);
          RemoteCacheManager remoteCacheManager = new RemoteCacheManager(cb.build());
-         this.remoteCacheManagers.put(uri, remoteCacheManager);
+         this.remoteCacheManagers.put(cluster.uri(), remoteCacheManager);
          validateEventLoop(remoteCacheManager);
-         clusters.get(uri).getCaches().forEach(cacheName -> remoteCaches.put(cacheName, remoteCacheManager.getCache(cacheName)));
+         for (String cache : cluster.caches()) {
+            remoteCaches.put(cache, remoteCacheManager.getCache(cache));
+         }
       }
    }
 
@@ -67,11 +66,11 @@ public class HotRodRemoteCachePoolImpl implements HotRodRemoteCachePool {
 
    @Override
    public void shutdown() {
-      this.remoteCacheManagers.values().forEach(rcm -> rcm.stop());
+      this.remoteCacheManagers.values().forEach(RemoteCacheManager::stop);
    }
 
    @Override
-   public RemoteCache getRemoteCache(String cacheName) {
+   public RemoteCache<?, ?> getRemoteCache(String cacheName) {
       return this.remoteCaches.get(cacheName);
    }
 }
